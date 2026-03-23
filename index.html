@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isiah Dane Geguera | Designer Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="#" class="logo">IDG<span class="logo-dot">.</span></a>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-greeting">Hello, I'm</p>
+            <h1 class="hero-name">Isiah Dane<br>Geguera</h1>
+            <p class="hero-title">Designer</p>
+            <p class="hero-description">I craft meaningful digital experiences through thoughtful design, blending aesthetics with functionality to bring ideas to life.</p>
+            <div class="hero-cta">
+                <a href="#work" class="btn btn-primary">View My Work</a>
+                <a href="#contact" class="btn btn-outline">Get In Touch</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-shape"></div>
+            <div class="hero-shape-accent"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about">
+        <div class="container">
+            <h2 class="section-label">About Me</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <h3 class="about-heading">Designing with purpose,<br>creating with passion.</h3>
+                    <p>I'm a designer who believes that great design is invisible — it just works. With a keen eye for detail and a deep understanding of user needs, I create experiences that are both beautiful and functional.</p>
+                    <p>My approach combines creative exploration with strategic thinking, ensuring every project delivers real impact for its audience.</p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <span class="stat-number">3+</span>
+                        <span class="stat-label">Years Experience</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">20+</span>
+                        <span class="stat-label">Projects Completed</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">15+</span>
+                        <span class="stat-label">Happy Clients</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work Section -->
+    <section class="section" id="work">
+        <div class="container">
+            <h2 class="section-label">Featured Work</h2>
+            <p class="section-subtitle">Selected projects that showcase my design approach.</p>
+            <div class="projects-grid">
+                <article class="project-card project-card--large">
+                    <div class="project-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="project-image-text">Project 01</div>
+                    </div>
+                    <div class="project-info">
+                        <span class="project-tag">UI/UX Design</span>
+                        <h3>Mobile Banking App</h3>
+                        <p>A seamless banking experience redesigned for the modern user with intuitive navigation and clean visuals.</p>
+                    </div>
+                </article>
+                <article class="project-card">
+                    <div class="project-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="project-image-text">Project 02</div>
+                    </div>
+                    <div class="project-info">
+                        <span class="project-tag">Brand Identity</span>
+                        <h3>Artisan Coffee Co.</h3>
+                        <p>Complete brand identity for a specialty coffee brand.</p>
+                    </div>
+                </article>
+                <article class="project-card">
+                    <div class="project-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="project-image-text">Project 03</div>
+                    </div>
+                    <div class="project-info">
+                        <span class="project-tag">Web Design</span>
+                        <h3>Travel Platform</h3>
+                        <p>A visually immersive travel booking platform.</p>
+                    </div>
+                </article>
+                <article class="project-card project-card--large">
+                    <div class="project-image" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="project-image-text">Project 04</div>
+                    </div>
+                    <div class="project-info">
+                        <span class="project-tag">Product Design</span>
+                        <h3>Fitness Tracker Dashboard</h3>
+                        <p>Data-rich dashboard design that makes health metrics accessible and actionable for everyday users.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="section" id="skills">
+        <div class="container">
+            <h2 class="section-label">Skills & Tools</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Design</h3>
+                    <ul class="skill-list">
+                        <li>UI/UX Design</li>
+                        <li>Visual Design</li>
+                        <li>Brand Identity</li>
+                        <li>Typography</li>
+                        <li>Illustration</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Tools</h3>
+                    <ul class="skill-list">
+                        <li>Figma</li>
+                        <li>Adobe Photoshop</li>
+                        <li>Adobe Illustrator</li>
+                        <li>Sketch</li>
+                        <li>Canva</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Other</h3>
+                    <ul class="skill-list">
+                        <li>Prototyping</li>
+                        <li>Wireframing</li>
+                        <li>User Research</li>
+                        <li>Design Systems</li>
+                        <li>Motion Design</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <div class="container">
+            <h2 class="section-label">Get In Touch</h2>
+            <div class="contact-content">
+                <h3 class="contact-heading">Let's create something<br>amazing together.</h3>
+                <p class="contact-text">Have a project in mind or just want to say hello? I'd love to hear from you.</p>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Tell me about your project..." rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-submit">Send Message</button>
+                </form>
+                <div class="contact-links">
+                    <a href="#" class="contact-link">LinkedIn</a>
+                    <a href="#" class="contact-link">Behance</a>
+                    <a href="#" class="contact-link">Dribbble</a>
+                    <a href="#" class="contact-link">Instagram</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Isiah Dane Geguera. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
