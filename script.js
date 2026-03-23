@@ -1,18 +1,13 @@
 // ============================================
 // Dynamic Wave Canvas Background
 // Ported from components/ui/dynamic-wave-canvas-background.tsx
-// Optimized: heavy downscale, throttled to ~20fps, pauses when tab hidden
 // ============================================
 (function initWaveCanvas() {
     const canvas = document.getElementById('waveCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let width, height, imageData, data;
-    const SCALE = 6; // heavy downscale for performance (was 2)
-    const FPS = 20;
-    const FRAME_INTERVAL = 1000 / FPS;
-    let lastFrame = 0;
-    let rafId = null;
+    const SCALE = 2;
 
     const resizeCanvas = () => {
         canvas.width = window.innerWidth;
@@ -23,44 +18,38 @@
         data = imageData.data;
     };
 
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resizeCanvas, 150);
-    });
+    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
     const startTime = Date.now();
 
     // Lookup tables for fast trig
-    const TABLE_SIZE = 1024;
-    const SIN_TABLE = new Float32Array(TABLE_SIZE);
-    const COS_TABLE = new Float32Array(TABLE_SIZE);
-    const TWO_PI = Math.PI * 2;
-    const INV_TWO_PI = 1 / TWO_PI;
-    for (let i = 0; i < TABLE_SIZE; i++) {
-        const angle = (i / TABLE_SIZE) * TWO_PI;
+    const SIN_TABLE = new Float32Array(1024);
+    const COS_TABLE = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) {
+        const angle = (i / 1024) * Math.PI * 2;
         SIN_TABLE[i] = Math.sin(angle);
         COS_TABLE[i] = Math.cos(angle);
     }
 
-    const fastSin = (x) => SIN_TABLE[((x % TWO_PI) * INV_TWO_PI * TABLE_SIZE | 0) & 1023];
-    const fastCos = (x) => COS_TABLE[((x % TWO_PI) * INV_TWO_PI * TABLE_SIZE | 0) & 1023];
+    const fastSin = (x) => {
+        const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
+        return SIN_TABLE[index];
+    };
 
-    const render = (now) => {
-        rafId = requestAnimationFrame(render);
+    const fastCos = (x) => {
+        const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
+        return COS_TABLE[index];
+    };
 
-        // Throttle frame rate
-        if (now - lastFrame < FRAME_INTERVAL) return;
-        lastFrame = now;
-
+    const render = () => {
         const time = (Date.now() - startTime) * 0.001;
-        const invH = 1 / height;
         for (let y = 0; y < height; y++) {
-            const u_y = (2 * y - height) * invH;
             for (let x = 0; x < width; x++) {
-                const u_x = (2 * x - width) * invH;
-                let a = 0, d = 0;
+                const u_x = (2 * x - width) / height;
+                const u_y = (2 * y - height) / height;
+                let a = 0;
+                let d = 0;
                 for (let i = 0; i < 4; i++) {
                     a += fastCos(i - d + time * 0.5 - a * u_x);
                     d += fastSin(i * u_y + a);
@@ -81,20 +70,14 @@
             }
         }
         ctx.putImageData(imageData, 0, 0);
-        ctx.imageSmoothingEnabled = true;
-        ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+        if (SCALE > 1) {
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+        }
+        requestAnimationFrame(render);
     };
 
-    // Pause when tab is hidden
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        } else {
-            if (!rafId) { rafId = requestAnimationFrame(render); }
-        }
-    });
-
-    rafId = requestAnimationFrame(render);
+    render();
 })();
 
 // ============================================

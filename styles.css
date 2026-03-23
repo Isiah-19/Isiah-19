@@ -185,8 +185,6 @@ img {
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    image-rendering: auto;
-    filter: blur(2px);
 }
 
 [data-theme="light"] #waveCanvas {
