@@ -1,115 +1,138 @@
 // ============================================
-// Dynamic Wave Canvas Background
-// Ported from components/ui/dynamic-wave-canvas-background.tsx
+// Particle System
 // ============================================
-(function initWaveCanvas() {
-    const canvas = document.getElementById('waveCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width, height, imageData, data;
-    const SCALE = 2;
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let mouse = { x: 0, y: 0 };
+let animationId;
 
-    const resizeCanvas = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        width = Math.floor(canvas.width / SCALE);
-        height = Math.floor(canvas.height / SCALE);
-        imageData = ctx.createImageData(width, height);
-        data = imageData.data;
-    };
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-    const startTime = Date.now();
-
-    // Lookup tables for fast trig
-    const SIN_TABLE = new Float32Array(1024);
-    const COS_TABLE = new Float32Array(1024);
-    for (let i = 0; i < 1024; i++) {
-        const angle = (i / 1024) * Math.PI * 2;
-        SIN_TABLE[i] = Math.sin(angle);
-        COS_TABLE[i] = Math.cos(angle);
+class Particle {
+    constructor() {
+        this.reset();
     }
 
-    const fastSin = (x) => {
-        const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
-        return SIN_TABLE[index];
-    };
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.targetOpacity = this.opacity;
+    }
 
-    const fastCos = (x) => {
-        const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
-        return COS_TABLE[index];
-    };
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
 
-    const render = () => {
-        const time = (Date.now() - startTime) * 0.001;
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const u_x = (2 * x - width) / height;
-                const u_y = (2 * y - height) / height;
-                let a = 0;
-                let d = 0;
-                for (let i = 0; i < 4; i++) {
-                    a += fastCos(i - d + time * 0.5 - a * u_x);
-                    d += fastSin(i * u_y + a);
-                }
-                const wave = (fastSin(a) + fastCos(d)) * 0.5;
-                const intensity = 0.3 + 0.4 * wave;
-                const baseVal = 0.1 + 0.15 * fastCos(u_x + u_y + time * 0.3);
-                const blueAccent = 0.2 * fastSin(a * 1.5 + time * 0.2);
-                const purpleAccent = 0.15 * fastCos(d * 2 + time * 0.1);
-                const r = Math.max(0, Math.min(1, baseVal + purpleAccent * 0.8)) * intensity;
-                const g = Math.max(0, Math.min(1, baseVal + blueAccent * 0.6)) * intensity;
-                const b = Math.max(0, Math.min(1, baseVal + blueAccent * 1.2 + purpleAccent * 0.4)) * intensity;
-                const idx = (y * width + x) * 4;
-                data[idx] = r * 255;
-                data[idx + 1] = g * 255;
-                data[idx + 2] = b * 255;
-                data[idx + 3] = 255;
+        // Mouse interaction
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 150) {
+            const force = (150 - dist) / 150;
+            this.x -= dx * force * 0.01;
+            this.y -= dy * force * 0.01;
+            this.targetOpacity = 0.8;
+        } else {
+            this.targetOpacity = this.opacity;
+        }
+
+        this.opacity += (this.targetOpacity - this.opacity) * 0.05;
+
+        // Wrap around
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+    }
+
+    draw() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const color = isDark ? `rgba(124, 58, 237, ${this.opacity})` : `rgba(124, 58, 237, ${this.opacity * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+}
+
+function initParticles() {
+    const count = Math.min(80, Math.floor((canvas.width * canvas.height) / 15000));
+    particles = [];
+    for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function drawConnections() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const maxDist = 120;
+
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < maxDist) {
+                const opacity = (1 - dist / maxDist) * 0.15;
+                const alpha = isDark ? opacity : opacity * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.strokeStyle = `rgba(124, 58, 237, ${alpha})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
             }
         }
-        ctx.putImageData(imageData, 0, 0);
-        if (SCALE > 1) {
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
-        }
-        requestAnimationFrame(render);
-    };
-
-    render();
-})();
-
-// ============================================
-// Custom Cursor
-// ============================================
-(function initCursor() {
-    const cursor = document.getElementById('cursor');
-    if (!cursor) return;
-
-    let cursorX = 0, cursorY = 0;
-    let targetX = 0, targetY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-    });
-
-    function updateCursor() {
-        cursorX += (targetX - cursorX) * 0.15;
-        cursorY += (targetY - cursorY) * 0.15;
-        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
-        requestAnimationFrame(updateCursor);
     }
+}
 
-    updateCursor();
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Magnetic hover for [data-magnetic] elements
-    document.querySelectorAll('[data-magnetic]').forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    particles.forEach(p => {
+        p.update();
+        p.draw();
     });
-})();
+
+    drawConnections();
+    animationId = requestAnimationFrame(animateParticles);
+}
+
+initParticles();
+animateParticles();
+
+document.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+// ============================================
+// Cursor Glow
+// ============================================
+const cursorGlow = document.getElementById('cursorGlow');
+
+document.addEventListener('mousemove', (e) => {
+    cursorGlow.style.left = e.clientX + 'px';
+    cursorGlow.style.top = e.clientY + 'px';
+    cursorGlow.classList.add('active');
+});
+
+document.addEventListener('mouseleave', () => {
+    cursorGlow.classList.remove('active');
+});
 
 // ============================================
 // Theme Toggle
@@ -146,50 +169,40 @@ navLinks.querySelectorAll('a').forEach(link => {
 });
 
 // ============================================
-// Cypher Decode Effect for [data-decode] elements
+// Typing Effect
 // ============================================
-(function initDecodeEffect() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
+const typingElement = document.getElementById('typingText');
+const roles = ['Designer', 'Creative Thinker', 'Problem Solver', 'UI/UX Enthusiast', 'Visual Storyteller'];
+let roleIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
 
-    document.querySelectorAll('[data-decode]').forEach(el => {
-        const original = el.textContent;
-        let revealed = 0;
+function typeEffect() {
+    const currentRole = roles[roleIndex];
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    observer.unobserve(el);
-                    const interval = setInterval(() => {
-                        let text = '';
-                        for (let i = 0; i < original.length; i++) {
-                            if (i < revealed) {
-                                text += original[i];
-                            } else {
-                                text += chars[Math.floor(Math.random() * chars.length)];
-                            }
-                        }
-                        el.textContent = text;
-                        revealed += 2;
-                        if (revealed > original.length) {
-                            el.textContent = original;
-                            clearInterval(interval);
-                        }
-                    }, 30);
-                }
-            });
-        }, { threshold: 0.5 });
+    if (isDeleting) {
+        typingElement.textContent = currentRole.substring(0, charIndex - 1);
+        charIndex--;
+    } else {
+        typingElement.textContent = currentRole.substring(0, charIndex + 1);
+        charIndex++;
+    }
 
-        observer.observe(el);
-    });
+    let speed = isDeleting ? 40 : 80;
 
-    // Decode lines with delay
-    document.querySelectorAll('[data-decode-line]').forEach(el => {
-        const delay = parseInt(el.getAttribute('data-delay') || '0', 10);
-        setTimeout(() => {
-            el.style.animationPlayState = 'running';
-        }, delay);
-    });
-})();
+    if (!isDeleting && charIndex === currentRole.length) {
+        speed = 2000;
+        isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        speed = 500;
+    }
+
+    setTimeout(typeEffect, speed);
+}
+
+typeEffect();
 
 // ============================================
 // Counter Animation
@@ -205,8 +218,11 @@ function animateCounters() {
         function updateCounter(currentTime) {
             const elapsed = currentTime - start;
             const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             const current = Math.floor(eased * target);
+
             counter.textContent = current;
 
             if (progress < 1) {
@@ -236,6 +252,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
+// Apply staggered animations
 document.querySelectorAll('.section-header, .about-heading, .about-text p, .section-subtitle, .contact-heading, .contact-text').forEach(el => {
     el.classList.add('fade-in');
     observer.observe(el);
@@ -334,6 +351,5 @@ contactForm.addEventListener('submit', (e) => {
 // Smooth Reveal on Page Load
 // ============================================
 window.addEventListener('load', () => {
-    document.body.classList.remove('loading');
     document.body.style.opacity = '1';
 });
